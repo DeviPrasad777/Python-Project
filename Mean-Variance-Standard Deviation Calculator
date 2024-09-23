@@ -1,0 +1,42 @@
+import numpy as np
+
+def calculate(lst):
+    # Convert the list to a 3x3 NumPy array
+    arr = np.array(lst).reshape(3, 3)
+
+    # Calculate the mean, variance, standard deviation, max, min, and sum
+    # along both axes and for the flattened matrix
+    output = {
+        'mean': {
+            'rows': np.mean(arr, axis=1),
+            'columns': np.mean(arr, axis=0),
+            'elements': np.mean(arr.flatten())
+        },
+        'variance': {
+            'rows': np.var(arr, axis=1),
+            'columns': np.var(arr, axis=0),
+            'elements': np.var(arr.flatten())
+        },
+        'std_dev': {
+            'rows': np.std(arr, axis=1),
+            'columns': np.std(arr, axis=0),
+            'elements': np.std(arr.flatten())
+        },
+        'max': {
+            'rows': np.max(arr, axis=1),
+            'columns': np.max(arr, axis=0),
+            'elements': np.max(arr.flatten())
+        },
+        'min': {
+            'rows': np.min(arr, axis=1),
+            'columns': np.min(arr, axis=0),
+            'elements': np.min(arr.flatten())
+        },
+        'sum': {
+            'rows': np.sum(arr, axis=1),
+            'columns': np.sum(arr, axis=0),
+            'elements': np.sum(arr.flatten())
+        }
+    }
+
+    return output
