@@ -1,0 +1,63 @@
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+def load_data():
+    # Import the data from medical_examination.csv and assign it to the df variable
+    df = pd.read_csv('medical_examination.csv')
+    return df
+
+def add_overweight_column(df):
+    # Add an overweight column to the data
+    df['overweight'] = (df['weight'] / (df['height'] / 100) ** 2) > 25
+    df['overweight'] = df['overweight'].astype(int)
+    return df
+
+def normalize_data(df):
+    # Normalize the data by making 0 always good and 1 always bad
+    df['cholesterol'] = df['cholesterol'].apply(lambda x: 0 if x == 1 else 1)
+    df['gluc'] = df['gluc'].apply(lambda x: 0 if x == 1 else 1)
+    return df
+
+def draw_cat_plot(df):
+    # Create a DataFrame for the cat plot using pd.melt
+    df_cat = pd.melt(df, id_vars=['cardio'], value_vars=['cholesterol', 'gluc', 'smoke', 'alco', 'active', 'overweight'])
+    # Group and reformat the data in df_cat to split it by cardio
+    df_cat = df_cat.groupby(['cardio', 'variable', 'value']).size().reset_index(name='count')
+    # Convert the data into long format and create a chart that shows the value counts of the categorical features
+    fig = plt.figure(figsize=(10, 6))
+    sns.catplot(x='variable', y='count', hue='value', col='cardio', data=df_cat, kind='bar')
+    return fig
+
+def clean_data(df):
+    # Clean the data by filtering out the following patient segments that represent incorrect data
+    df = df[(df['ap_lo'] <= df['ap_hi']) &
+            (df['height'] >= df['height'].quantile(0.025)) &
+            (df['height'] <= df['height'].quantile(0.975)) &
+            (df['weight'] >= df['weight'].quantile(0.025)) &
+            (df['weight'] <= df['weight'].quantile(0.975))]
+    return df
+
+def draw_heat_map(df):
+    # Calculate the correlation matrix
+    corr = df.corr()
+    # Generate a mask for the upper triangle
+    mask = np.triu(np.ones_like(corr, dtype=bool))
+    # Set up the matplotlib figure
+    fig, ax = plt.subplots(figsize=(10, 8))
+    # Plot the correlation matrix using seaborn's heatmap()
+    sns.heatmap(corr, mask=mask, vmax=.3, square=True)
+    return fig
+
+def main():
+    df = load_data()
+    df = add_overweight_column(df)
+    df = normalize_data(df)
+    fig = draw_cat_plot(df)
+    plt.show()
+    df = clean_data(df)
+    fig = draw_heat_map(df)
+    plt.show()
+
+if __name__ == '__main__':
+    main()
