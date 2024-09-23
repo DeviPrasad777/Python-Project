@@ -1,0 +1,70 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+def load_data():
+    # Use Pandas to import the data from "fcc-forum-pageviews.csv"
+    df = pd.read_csv('fcc-forum-pageviews.csv')
+    # Set the index to the date column
+    df['date'] = pd.to_datetime(df['date'])
+    df.set_index('date', inplace=True)
+    return df
+
+def clean_data(df):
+    # Clean the data by filtering out days when the page views were in the top 2.5% of the dataset or bottom 2.5% of the dataset
+    df = df[(df['value'] >= df['value'].quantile(0.025)) & (df['value'] <= df['value'].quantile(0.975))]
+    return df
+
+def draw_line_plot(df):
+    # Create a copy of the data frame
+    df_copy = df.copy()
+    # Create a line chart similar to "examples/Figure_1.png"
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.plot(df_copy.index, df_copy['value'])
+    ax.set_title('Daily freeCodeCamp Forum Page Views 5/2016-12/2019')
+    ax.set_xlabel('Date')
+    ax.set_ylabel('Page Views')
+    return fig
+
+def draw_bar_plot(df):
+    # Create a copy of the data frame
+    df_copy = df.copy()
+    # Create a bar chart similar to "examples/Figure_2.png"
+    df_copy['year'] = df_copy.index.year
+    df_copy['month'] = df_copy.index.month
+    df_copy = df_copy.groupby(['year', 'month'])['value'].mean().unstack()
+    fig, ax = plt.subplots(figsize=(10, 6))
+    df_copy.plot(kind='bar', ax=ax)
+    ax.set_title('Average Daily Page Views by Month')
+    ax.set_xlabel('Years')
+    ax.set_ylabel('Average Page Views')
+    ax.legend(title='Months')
+    return fig
+
+def draw_box_plot(df):
+    # Create a copy of the data frame
+    df_copy = df.copy()
+    # Create two adjacent box plots similar to "examples/Figure_3.png"
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 6))
+    sns.boxplot(x=df_copy.index.year, y=df_copy['value'], ax=ax1)
+    ax1.set_title('Year-wise Box Plot (Trend)')
+    ax1.set_xlabel('Year')
+    ax1.set_ylabel('Page Views')
+    sns.boxplot(x=df_copy.index.month, y=df_copy['value'], ax=ax2)
+    ax2.set_title('Month-wise Box Plot (Seasonality)')
+    ax2.set_xlabel('Month')
+    ax2.set_ylabel('Page Views')
+    return fig
+
+def main():
+    df = load_data()
+    df = clean_data(df)
+    fig1 = draw_line_plot(df)
+    plt.show()
+    fig2 = draw_bar_plot(df)
+    plt.show()
+    fig3 = draw_box_plot(df)
+    plt.show()
+
+if __name__ == '__main__':
+    main()
